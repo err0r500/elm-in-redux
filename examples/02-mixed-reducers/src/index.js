@@ -36,7 +36,7 @@ const store = createStore(reducer, compose(
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 ));
 
-// to receive messages from elm module
+// to receive messages from elm modules
 elmBridge1.subscribe(store);
 elmBridge2.subscribe(store);
 
