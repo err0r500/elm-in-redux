@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ElmBridge = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -15,27 +14,28 @@ var _camelcase2 = _interopRequireDefault(_camelcase);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var ELM = '@@elm:';
 var subscriptionPort = 'elmOutPort';
 
-var ElmBridge = exports.ElmBridge = function ElmBridge(elmRawModule, init) {
-    var prefix = uuidv4();
-    var elmModule = elmRawModule.worker(init);
+var ElmBridge = function ElmBridge(elmModule, init) {
+    var _this = this;
 
-    var reducer = function reducer() {
-        return function () {
-            var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : init;
-            var action = arguments[1];
+    _classCallCheck(this, ElmBridge);
 
-            if (isElmAction(action, prefix)) {
-                return action.payload;
-            }
+    this.reducer = function () {
+        var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.init;
+        var action = arguments[1];
 
-            return state;
-        };
+        if (isElmAction(action, _this.prefix)) {
+            return action.payload;
+        }
+
+        return state;
     };
 
-    var sendActionsToElm = function sendActionsToElm() {
+    this.sendActionsToElm = function () {
         return function (next) {
             return function (action) {
                 var elmPortName = actionTypeToElmPortName(action.type);
@@ -46,12 +46,12 @@ var ElmBridge = exports.ElmBridge = function ElmBridge(elmRawModule, init) {
                 }
 
                 // send complete action object
-                if (elmInPortExists(elmModule, elmPortName)) {
-                    elmModule.ports[elmPortName].send(action);
+                if (elmInPortExists(_this.worker, elmPortName)) {
+                    _this.worker.ports[elmPortName].send(action);
                 }
                 // send only the Action payload property
-                if (elmInPortExists(elmModule, elmPortName + 'Payload')) {
-                    elmModule.ports[elmPortName + 'Payload'].send(forgedPayload(action));
+                if (elmInPortExists(_this.worker, elmPortName + 'Payload')) {
+                    _this.worker.ports[elmPortName + 'Payload'].send(forgedPayload(action));
                 }
 
                 return next(action);
@@ -59,26 +59,34 @@ var ElmBridge = exports.ElmBridge = function ElmBridge(elmRawModule, init) {
         };
     };
 
-    // subscribes to elmOutPort and will send an action caught by createElmReducer() above
-    var subscribeToElm = function subscribeToElm(store) {
-        if (elmOutPortReady(elmModule)) {
-            elmModule.ports[subscriptionPort].subscribe(function (_ref) {
+    this.subscribe = function (store) {
+        if (elmOutPortReady(_this.worker)) {
+            _this.worker.ports[subscriptionPort].subscribe(function (_ref) {
                 var _ref2 = _slicedToArray(_ref, 2),
                     action = _ref2[0],
                     nextState = _ref2[1];
 
                 store.dispatch({
-                    type: toElmActionType(action, prefix),
+                    type: toElmActionType(action, _this.prefix),
                     payload: nextState
                 });
             });
         }
     };
 
-    return { reducer: reducer, sendActionsToElm: sendActionsToElm, subscribeToElm: subscribeToElm };
-};
+    this.elmModule = elmModule;
+    this.init = init;
+
+    this.worker = elmModule.worker(init);
+    this.prefix = uuid4();
+}
+
+// subscribes to elmOutPort and will send an action caught by createElmReducer() above
+;
 
 // default export
+
+
 exports.default = ElmBridge;
 
 // private Helpers
@@ -102,7 +110,7 @@ var actionTypeToElmPortName = function actionTypeToElmPortName(actionType) {
     return (0, _camelcase2.default)(actionType);
 }; // elm doesn't like CAPITAL_CASE variables so convert it to camelCase
 
-var uuidv4 = function uuidv4() {
+var uuid4 = function uuid4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0,
             v = c == 'x' ? r : r & 0x3 | 0x8;

@@ -12,33 +12,33 @@ import OtherElmModule from './OtherReducer'
 import {basicCounterReducer, loggerMiddleware} from './others'
 
 
-const module1 = new ElmBridge(
+const elmBridge1 = new ElmBridge(
     ElmModule.Reducer, // Reducer is the name of the elm module
     {count: 1, value: 100}
 );
 
-const module2 = new ElmBridge(
+const elmBridge2 = new ElmBridge(
     OtherElmModule.OtherReducer, // OtherReducer is the name of the elm module
     {count: 2, value: 10}
 );
 
 const reducer = combineReducers({
-    elmReducer: module1.reducer(),
-    otherElmReducer: module2.reducer(),
-    reactReducer: basicCounterReducer // a basic redux reducer, just for the example
+    elmReducer: elmBridge1.reducer,
+    otherElmReducer: elmBridge2.reducer,
+    reactReducer: basicCounterReducer // a basic standard reducer, just for the example
 });
 
 const store = createStore(reducer, compose(
     applyMiddleware(
-        module1.sendActionsToElm,
-        module2.sendActionsToElm,
+        elmBridge1.sendActionsToElm,
+        elmBridge2.sendActionsToElm,
         loggerMiddleware), // basicLogger
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 ));
 
 // to receive messages from elm module
-module1.subscribe(store);
-module2.subscribe(store);
+elmBridge1.subscribe(store);
+elmBridge2.subscribe(store);
 
 
 ReactDOM.render(

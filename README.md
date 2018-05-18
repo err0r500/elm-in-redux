@@ -1,8 +1,5 @@
 # elm-in-redux
 
-## Description
-Elm-in-redux is a redux middleware you can use to handle a reducer with an Elm module.
-
 ## Motivation
 
 * write bulletproof businesslogic
@@ -11,8 +8,13 @@ Elm-in-redux is a redux middleware you can use to handle a reducer with an Elm m
 
 ## Running the Example
 
+the examples use directly the src folder so first of all :
 ```bash
-cd examples/simplecounter
+npm install
+```
+then :
+```bash
+cd examples/theExampleYouWant
 npm install
 npm start
 ```

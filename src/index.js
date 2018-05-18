@@ -12,7 +12,7 @@ class ElmBridge {
         this.prefix = uuid4();
     }
 
-    reducer = () => (state = this.init, action) => {
+    reducer = (state = this.init, action) => {
         if (isElmAction(action, this.prefix)) {
             return action.payload
         }

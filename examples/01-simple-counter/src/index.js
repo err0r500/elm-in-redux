@@ -8,25 +8,23 @@ import ElmBridge from 'elm-in-redux'
 
 import ElmModule from './MyReducer'
 
-const module = new ElmBridge(
-    ElmModule.MyReducer, // Reducer is the name of the elm module
-    reducerInitialState
+const elmBridge = new ElmBridge(
+    ElmModule.MyReducer, // MyReducer is the name of the elm module
+    reducerInitialState // set the initial state in redux & elm
 );
 
 const reducer = combineReducers({
-    elmReducer: module.reducer(), // set initial state in redux, but not took into account by elm,
+    elmReducer: elmBridge.reducer, // set initial state in redux, but not took into account by elm,
 });
 
 const store = createStore(reducer, compose(
     applyMiddleware(
-        module.sendActionsToElm,
+        elmBridge.sendActionsToElm,
     ),
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-))
+));
 
-console.log(module)
-
-module.subscribe(store) // to receive messages from elm module
+elmBridge.subscribe(store) // to receive messages from elm module
 
 
 ReactDOM.render(
