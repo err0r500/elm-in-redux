@@ -3,12 +3,17 @@ import camelCase from 'camelcase'
 const ELM = '@@elm:';
 const subscriptionPort = 'elmOutPort';
 
-export const ElmBridge = (elmRawModule, init) => {
-    const prefix = uuidv4();
-    const elmModule = elmRawModule.worker(init);
+class ElmBridge {
+    constructor(elmModule, init) {
+        this.elmModule = elmModule;
+        this.init = init;
 
-    const reducer = () => (state = init, action) => {
-        if (isElmAction(action, prefix)) {
+        this.worker = elmModule.worker(init);
+        this.prefix = uuid4();
+    }
+
+    reducer = () => (state = this.init, action) => {
+        if (isElmAction(action, this.prefix)) {
             return action.payload
         }
 
@@ -16,7 +21,7 @@ export const ElmBridge = (elmRawModule, init) => {
     };
 
 
-    const sendActionsToElm = () => next => action => {
+    sendActionsToElm = () => next => action => {
         const elmPortName = actionTypeToElmPortName(action.type);
 
         if (elmPortName === subscriptionPort) {
@@ -26,24 +31,24 @@ export const ElmBridge = (elmRawModule, init) => {
         }
 
         // send complete action object
-        if (elmInPortExists(elmModule, elmPortName)) {
-            elmModule.ports[elmPortName].send(action)
+        if (elmInPortExists(this.worker, elmPortName)) {
+            this.worker.ports[elmPortName].send(action)
         }
         // send only the Action payload property
-        if (elmInPortExists(elmModule, `${elmPortName}Payload`)) {
-            elmModule.ports[`${elmPortName}Payload`].send(forgedPayload(action))
+        if (elmInPortExists(this.worker, `${elmPortName}Payload`)) {
+            this.worker.ports[`${elmPortName}Payload`].send(forgedPayload(action))
         }
 
         return next(action)
     };
 
     // subscribes to elmOutPort and will send an action caught by createElmReducer() above
-    const subscribeToElm = store => {
-        if (elmOutPortReady(elmModule)) {
-            elmModule.ports[subscriptionPort].subscribe(
+    subscribe = store => {
+        if (elmOutPortReady(this.worker)) {
+            this.worker.ports[subscriptionPort].subscribe(
                 ([action, nextState]) => {
                     store.dispatch({
-                        type: toElmActionType(action, prefix),
+                        type: toElmActionType(action, this.prefix),
                         payload: nextState
                     })
                 }
@@ -51,8 +56,8 @@ export const ElmBridge = (elmRawModule, init) => {
         }
     };
 
-    return {reducer, sendActionsToElm, subscribeToElm}
-};
+}
+
 
 // default export
 export default ElmBridge
@@ -65,9 +70,9 @@ const forgedPayload = action => typeof action.payload === undefined ? null : act
 const elmOutPortReady = elmModule => elmModule && elmModule.ports && elmModule.ports[subscriptionPort];
 const actionTypeToElmPortName = actionType => camelCase(actionType); // elm doesn't like CAPITAL_CASE variables so convert it to camelCase
 
-const uuidv4 = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+const uuid4 = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }

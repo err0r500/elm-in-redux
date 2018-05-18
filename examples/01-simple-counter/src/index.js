@@ -8,7 +8,7 @@ import ElmBridge from 'elm-in-redux'
 
 import ElmModule from './MyReducer'
 
-const module = ElmBridge(
+const module = new ElmBridge(
     ElmModule.MyReducer, // Reducer is the name of the elm module
     reducerInitialState
 );
@@ -26,7 +26,7 @@ const store = createStore(reducer, compose(
 
 console.log(module)
 
-module.subscribeToElm(store) // to receive messages from elm module
+module.subscribe(store) // to receive messages from elm module
 
 
 ReactDOM.render(

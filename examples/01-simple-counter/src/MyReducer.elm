@@ -10,7 +10,7 @@ Ex with an action like :
 { type : "PLEASE_DECREMENT" }
 will be sent to the "pleaseDecrement" port
 -}
-port increment : (Json.Encode.Value -> msg) -> Sub msg
+port incrementPayload : (Json.Encode.Value -> msg) -> Sub msg
 
 
 port pleaseDecrement : (Json.Encode.Value -> msg) -> Sub msg
@@ -26,7 +26,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ pleaseDecrement <| always Decrement
-        , increment <| always Increment
+        , incrementPayload <| always Increment
         ]
 
 
