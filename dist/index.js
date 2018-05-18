@@ -61,6 +61,7 @@ var ElmBridge = function ElmBridge(elmModule, init) {
 
     this.subscribe = function (store) {
         if (elmOutPortReady(_this.worker)) {
+            console.log("register");
             _this.worker.ports[subscriptionPort].subscribe(function (_ref) {
                 var _ref2 = _slicedToArray(_ref, 2),
                     action = _ref2[0],
