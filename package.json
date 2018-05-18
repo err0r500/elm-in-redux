@@ -1,0 +1,51 @@
+{
+  "name": "elm-in-redux",
+  "version": "5.0.0",
+  "description": "Elm middleware for redux",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "nyc --r html mocha --require babel-core/register",
+    "build": "babel src --out-dir dist",
+    "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/err0r500/elm-in-redux.git"
+  },
+  "author": "Christoph Hermann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/err0r500/elm-in-redux/issues"
+  },
+  "homepage": "https://github.com/err0r500/elm-in-redux#readme",
+  "dependencies": {
+    "camelcase": "5.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.3.17",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.5.0",
+    "codecov": "^1.0.1",
+    "elm": "^0.18.0",
+    "elm-live": "^2.2.1",
+    "elm-webpack-loader": "^4.5.0",
+    "jsdom-test-browser": "^4.0.2",
+    "mocha": "^2.4.5",
+    "nyc": "^8.3.0",
+    "redux": "^3.0.0",
+    "redux-mock-store": "^1.0.2",
+    "redux-test-reducer": "^0.1.0",
+    "sinon": "^1.17.4",
+    "webpack": "^4.8.3",
+    "webpack-cli": "^2.1.3",
+    "webpack-dev-server": "^3.1.4",
+    "xyz": "^1.0.1"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}
