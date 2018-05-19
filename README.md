@@ -1,4 +1,6 @@
 # elm-in-redux
+[![Build Status](https://travis-ci.org/err0r500/elm-in-redux.svg?branch=master)](https://travis-ci.org/err0r500/elm-in-redux)
+[![codecov](https://codecov.io/gh/err0r500/elm-in-redux/branch/master/graph/badge.svg)](https://codecov.io/gh/err0r500/elm-in-redux)
 
 ## Motivation
 
