@@ -60,8 +60,8 @@ class ElmBridge {
 export default ElmBridge
 
 // private Helpers
-const isElmAction = (action, prefix) => action.type.split('/')[0] === `${prefix}`;
-const toElmActionType = (action, prefix) => `${prefix}/${action}`;
+const isElmAction = (action, prefix) => action.type === `${prefix}`;
+const toElmActionType = (action, prefix) => `${prefix}`;
 const elmInPortExists = (elmModule, portName) => elmModule.ports && elmModule.ports[portName];
 const elmOutPortReady = elmModule => elmModule && elmModule.ports && elmModule.ports[subscriptionPort];
 const actionTypeToElmPortName = actionType => camelCase(actionType); // elm doesn't like CAPITAL_CASE variables so convert it to camelCase
