@@ -24,7 +24,7 @@ const store = createStore(reducer,
 );
 
 // to receive messages from elm module
-elmBridge.subscribe(store)
+elmBridge.subscribe(store);
 
 
 ReactDOM.render(
