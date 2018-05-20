@@ -8,7 +8,7 @@ import Platform
 import Json.Encode as Json
 
 
-port elmOutPort : ( String, Json.Value ) -> Cmd msg
+port elmOutPort : Json.Value -> Cmd msg
 
 
 type alias ModelUpdater msg model =
@@ -68,14 +68,14 @@ programWithFlags app =
 
 updater : ModelUpdater msg model -> ModelEncoder model -> msg -> model -> ( model, Cmd msg )
 updater updateFunc encoder actionMsg newModel =
-    reducer actionMsg encoder <| updateFunc actionMsg newModel
+    reducer encoder <| updateFunc actionMsg newModel
 
 
-reducer : msg -> ModelEncoder model -> ( model, Cmd msg ) -> ( model, Cmd msg )
-reducer actionMsg encoder ( newModel, elmCmd ) =
+reducer : ModelEncoder model -> ( model, Cmd msg ) -> ( model, Cmd msg )
+reducer encoder ( newModel, elmCmd ) =
     ( newModel
     , Cmd.batch
         [ elmCmd -- emit also the command from elm update func
-        , elmOutPort ( toString actionMsg, encoder newModel )
+        , elmOutPort <| encoder newModel
         ]
     )

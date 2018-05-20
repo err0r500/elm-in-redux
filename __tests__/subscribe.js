@@ -21,7 +21,7 @@ describe('subscribe', () => {
             worker: jest.fn().mockReturnValue({
                     ports: {
                         elmOutPort: {
-                            subscribe: func => func(['anything', {prop1: "hey"}]) // pass it an array, it will be transformed before calling the dispatch
+                            subscribe: func => func({prop1: "hey"}) // pass it an array, it will be transformed before calling the dispatch
 
                         }
                     }
@@ -44,7 +44,7 @@ describe('subscribe', () => {
                     ports: {
                         elmOutPort: {
                             subscribe: (fn) => {
-                                fn(['anything', {prop1: "hey"}])
+                                fn({prop1: "hey"})
                             }
                         }
                     }
@@ -57,7 +57,6 @@ describe('subscribe', () => {
 
         expect(store.getActions()).toEqual([{type: eB.prefix, payload: {prop1: 'hey'}}]);
 
-        eB.reducer(store.getState(), store.getActions()[0]);
-        expect(store.getState()).toEqual({prop1: 'hey'})
+        expect(eB.reducer(store.getState(), store.getActions()[0])).toEqual({prop1: 'hey'});
     })
 });

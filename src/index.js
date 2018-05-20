@@ -11,7 +11,8 @@ class ElmBridge {
 
     reducer = (state = this.init, action) => {
         if (isElmAction(action, this.prefix)) {
-            return Object.assign(state, action.payload)
+            // return action.payload
+            return Object.assign({}, state, action.payload)
         }
 
         return state
@@ -43,9 +44,9 @@ class ElmBridge {
     subscribe = store => {
         if (elmOutPortReady(this.worker)) {
             this.worker.ports[subscriptionPort].subscribe(
-                ([action, nextState]) => {
+                nextState => {
                     store.dispatch({
-                        type: toElmActionType(action, this.prefix),
+                        type: this.prefix,
                         payload: nextState
                     })
                 }
@@ -61,7 +62,6 @@ export default ElmBridge
 
 // private Helpers
 const isElmAction = (action, prefix) => action.type === `${prefix}`;
-const toElmActionType = (action, prefix) => `${prefix}`;
 const elmInPortExists = (elmModule, portName) => elmModule.ports && elmModule.ports[portName];
 const elmOutPortReady = elmModule => elmModule && elmModule.ports && elmModule.ports[subscriptionPort];
 const actionTypeToElmPortName = actionType => camelCase(actionType); // elm doesn't like CAPITAL_CASE variables so convert it to camelCase
