@@ -11,7 +11,6 @@ class ElmBridge {
 
     reducer = (state = this.init, action) => {
         if (isElmAction(action, this.prefix)) {
-            // return action.payload
             return Object.assign({}, state, action.payload)
         }
 
@@ -19,7 +18,7 @@ class ElmBridge {
     };
 
 
-    sendActionsToElm = () => next => action => {
+    sendActionsToElm = store => next => action => {
         const elmPortName = actionTypeToElmPortName(action.type);
 
         if (elmPortName === subscriptionPort) {
@@ -28,9 +27,9 @@ class ElmBridge {
             return next(action)
         }
 
-        // send complete action object
+        // send the complete action object and the current Store state
         if (elmInPortExists(this.worker, elmPortName)) {
-            this.worker.ports[elmPortName].send(action)
+            this.worker.ports[elmPortName].send(Object.assign({currState: store.getState()}, action))
         }
         // send only action.payload
         if (action.payload !== undefined && elmInPortExists(this.worker, `${elmPortName}Payload`)) {

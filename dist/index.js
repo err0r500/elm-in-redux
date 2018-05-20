@@ -24,14 +24,13 @@ var ElmBridge = function ElmBridge(elmModule, init) {
         var action = arguments[1];
 
         if (isElmAction(action, _this.prefix)) {
-            // return action.payload
             return Object.assign({}, state, action.payload);
         }
 
         return state;
     };
 
-    this.sendActionsToElm = function () {
+    this.sendActionsToElm = function (store) {
         return function (next) {
             return function (action) {
                 var elmPortName = actionTypeToElmPortName(action.type);
@@ -41,9 +40,9 @@ var ElmBridge = function ElmBridge(elmModule, init) {
                     return next(action);
                 }
 
-                // send complete action object
+                // send the complete action object and the current Store state
                 if (elmInPortExists(_this.worker, elmPortName)) {
-                    _this.worker.ports[elmPortName].send(action);
+                    _this.worker.ports[elmPortName].send(Object.assign({ currState: store.getState() }, action));
                 }
                 // send only action.payload
                 if (action.payload !== undefined && elmInPortExists(_this.worker, elmPortName + 'Payload')) {

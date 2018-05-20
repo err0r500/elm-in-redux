@@ -21,7 +21,7 @@ test('should expose the API', () => {
 })
 
 
-describe('reducer action handling', () => {
+describe('middleware action handling', () => {
     test('should dispatch any received action', () => {
         const sendToElm = jest.fn();
         const dontSendToElm = jest.fn();
@@ -39,7 +39,7 @@ describe('reducer action handling', () => {
             )
         }, {});
 
-        const store = configureStore([eB.sendActionsToElm])({});
+        const store = configureStore([eB.sendActionsToElm])({prop1: "hey"});
         const addTodo = () => ({type: 'ADD_TODO'});
 
         store.dispatch(addTodo());
@@ -47,7 +47,7 @@ describe('reducer action handling', () => {
         expect(store.getActions()).toEqual([addTodo()]);
         expect(dontSendToElm).toHaveBeenCalledTimes(0); // no an elm action => should not have been called
         expect(sendToElm).toHaveBeenCalledTimes(1); // port name is the camel case version of the action, should be called
-        expect(sendToElm).toHaveBeenCalledWith(addTodo()) // the complete action is sent to Elm
+        expect(sendToElm).toHaveBeenCalledWith({"currState": {"prop1": "hey"}, "type": "ADD_TODO"}) // the complete action is sent to Elm
     })
 
     test('should send only the payload if name end with _PAYLOAD', () => {
