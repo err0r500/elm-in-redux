@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var _camelcase = require('camelcase');
 
 var _camelcase2 = _interopRequireDefault(_camelcase);
@@ -16,7 +12,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ELM = '@@elm:';
 var subscriptionPort = 'elmOutPort';
 
 var ElmBridge = function ElmBridge(elmModule, init) {
@@ -29,7 +24,8 @@ var ElmBridge = function ElmBridge(elmModule, init) {
         var action = arguments[1];
 
         if (isElmAction(action, _this.prefix)) {
-            return action.payload;
+            // return action.payload
+            return Object.assign({}, state, action.payload);
         }
 
         return state;
@@ -49,9 +45,9 @@ var ElmBridge = function ElmBridge(elmModule, init) {
                 if (elmInPortExists(_this.worker, elmPortName)) {
                     _this.worker.ports[elmPortName].send(action);
                 }
-                // send only the Action payload property
-                if (elmInPortExists(_this.worker, elmPortName + 'Payload')) {
-                    _this.worker.ports[elmPortName + 'Payload'].send(forgedPayload(action));
+                // send only action.payload
+                if (action.payload !== undefined && elmInPortExists(_this.worker, elmPortName + 'Payload')) {
+                    _this.worker.ports[elmPortName + 'Payload'].send(action.payload);
                 }
 
                 return next(action);
@@ -61,28 +57,21 @@ var ElmBridge = function ElmBridge(elmModule, init) {
 
     this.subscribe = function (store) {
         if (elmOutPortReady(_this.worker)) {
-            console.log("register");
-            _this.worker.ports[subscriptionPort].subscribe(function (_ref) {
-                var _ref2 = _slicedToArray(_ref, 2),
-                    action = _ref2[0],
-                    nextState = _ref2[1];
-
+            _this.worker.ports[subscriptionPort].subscribe(function (nextState) {
                 store.dispatch({
-                    type: toElmActionType(action, _this.prefix),
+                    type: _this.prefix,
                     payload: nextState
                 });
             });
         }
     };
 
-    this.elmModule = elmModule;
     this.init = init;
-
     this.worker = elmModule.worker(init);
     this.prefix = uuid4();
 }
 
-// subscribes to elmOutPort and will send an action caught by createElmReducer() above
+// subscribes to elmOutPort and will send an action caught by reducer() above
 ;
 
 // default export
@@ -93,16 +82,10 @@ exports.default = ElmBridge;
 // private Helpers
 
 var isElmAction = function isElmAction(action, prefix) {
-    return action.type.split('/')[0] === '' + ELM + prefix;
-};
-var toElmActionType = function toElmActionType(action, prefix) {
-    return '' + ELM + prefix + '/' + action;
+    return action.type === '' + prefix;
 };
 var elmInPortExists = function elmInPortExists(elmModule, portName) {
     return elmModule.ports && elmModule.ports[portName];
-};
-var forgedPayload = function forgedPayload(action) {
-    return _typeof(action.payload) === undefined ? null : action.payload;
 };
 var elmOutPortReady = function elmOutPortReady(elmModule) {
     return elmModule && elmModule.ports && elmModule.ports[subscriptionPort];
