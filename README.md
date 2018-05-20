@@ -7,6 +7,14 @@
 * write bulletproof businesslogic
 * keep the react (and redux) ecosystem
 
+## Features
+* smooth integration with redux (see below)
+* partial reducer handling 
+* multiple reducers handling
+* reducer's current state sent to Elm (so you don't have to fear out of sync models)
+* select from Elm which actions are handled (using a port with the action.type in camelCase)
+* use yourActionTypePayload (ex: addTodoPayload) as port name to receive only the action.payload (if present) 
+
 ## Running the examples
 
 the examples use directly the src folder so first of all :
