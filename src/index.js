@@ -18,7 +18,7 @@ class ElmBridge {
     };
 
 
-    sendActionsToElm = store => next => action => {
+    middleware = store => next => action => {
         const elmPortName = actionTypeToElmPortName(action.type);
 
         if (elmPortName === subscriptionPort) {

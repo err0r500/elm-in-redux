@@ -19,7 +19,7 @@ const reducer = combineReducers({
 
 const store = createStore(reducer,
     applyMiddleware(
-        elmBridge.sendActionsToElm,
+        elmBridge.middleware,
     )
 );
 

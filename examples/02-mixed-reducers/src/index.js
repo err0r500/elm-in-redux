@@ -30,8 +30,8 @@ const reducer = combineReducers({
 
 const store = createStore(reducer, compose(
     applyMiddleware(
-        elmBridge1.sendActionsToElm,
-        elmBridge2.sendActionsToElm,
+        elmBridge1.middleware,
+        elmBridge2.middleware,
         loggerMiddleware), // basicLogger
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 ));

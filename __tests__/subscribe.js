@@ -29,7 +29,7 @@ describe('subscribe', () => {
             )
         }, {});
 
-        const store = configureStore([eB.sendActionsToElm])({});
+        const store = configureStore([eB.middleware])({});
         store.dispatch = sendToElm;
 
         eB.subscribe(store);
@@ -52,7 +52,7 @@ describe('subscribe', () => {
             )
         }, {});
 
-        const store = configureStore([eB.sendActionsToElm])({prop1: 'foo'});
+        const store = configureStore([eB.middleware])({prop1: 'foo'});
         eB.subscribe(store);
 
         expect(store.getActions()).toEqual([{type: eB.prefix, payload: {prop1: 'hey'}}]);

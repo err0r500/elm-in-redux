@@ -30,7 +30,7 @@ var ElmBridge = function ElmBridge(elmModule, init) {
         return state;
     };
 
-    this.sendActionsToElm = function (store) {
+    this.middleware = function (store) {
         return function (next) {
             return function (action) {
                 var elmPortName = actionTypeToElmPortName(action.type);

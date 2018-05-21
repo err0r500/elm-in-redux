@@ -16,7 +16,7 @@ test('should expose the API', () => {
     const eB = getEB();
 
     expect(eB).toHaveProperty('reducer');
-    expect(eB).toHaveProperty('sendActionsToElm');
+    expect(eB).toHaveProperty('middleware');
     expect(eB).toHaveProperty('subscribe')
 })
 
@@ -39,7 +39,7 @@ describe('middleware action handling', () => {
             )
         }, {});
 
-        const store = configureStore([eB.sendActionsToElm])({prop1: "hey"});
+        const store = configureStore([eB.middleware])({prop1: "hey"});
         const addTodo = () => ({type: 'ADD_TODO'});
 
         store.dispatch(addTodo());
@@ -68,7 +68,7 @@ describe('middleware action handling', () => {
             )
         }, {});
 
-        const store = configureStore([eB.sendActionsToElm])({});
+        const store = configureStore([eB.middleware])({});
         const addTodo = () => ({
             type: 'ADD_TODO',
             payload: 'hey'
@@ -100,7 +100,7 @@ describe('middleware action handling', () => {
             )
         }, {});
 
-        const store = configureStore([eB.sendActionsToElm])({});
+        const store = configureStore([eB.middleware])({});
         const addTodo = () => ({
             type: 'ELM_OUT_PORT',
             payload: 'hey'
