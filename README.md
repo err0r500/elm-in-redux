@@ -4,12 +4,12 @@
 
 ## Motivation
 
-* write bulletproof businesslogic
+* write bulletproof business logic
 * keep the react (and redux) ecosystem
 
 ## Features
+* handle a complete or partial reducer 
 * smooth integration with redux (see below)
-* partial reducer handling 
 * multiple reducers handling
 * reducer's current state sent to Elm (so you don't have to fear out of sync models)
 * select from Elm which actions are handled (using a port with the action.type in camelCase)
@@ -61,7 +61,7 @@ const reducer = combineReducers({
 
 const store = createStore(reducer, 
     applyMiddleware(
-        elmBridge.sendActionsToElm,
+        elmBridge.middleware,
     )
 );
 
