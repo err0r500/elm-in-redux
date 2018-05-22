@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "summary": "Elm middleware for redux",
   "repository": "https://github.com/err0r500/redux-elm-middleware.git",
-  "license": "BSD3",
+  "license": "MIT",
   "source-directories": [
     ".",
     "src"

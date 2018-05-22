@@ -1,12 +1,14 @@
-port module MyReducer exposing (Model, Msg)
+port module MyReducer exposing (..)
+
+{-| the Elm middleware will transform the action.type-s to camel case
+-}
 
 import Redux
 import Json.Encode exposing (..)
 import Json.Decode exposing (..)
 
 
-{-| the Elm middleware will transform the action.type-s to camel case
-Ex with an action like :
+{-| Ex with an action like :
 { type : "PLEASE_DECREMENT" }
 will be sent to the "pleaseDecrement" port
 -}
@@ -47,7 +49,7 @@ fallBackModel =
 
 init : Json.Decode.Value -> ( Model, Cmd Msg )
 init flags =
-    case Json.Decode.decodeValue flagsDecoder flags of
+    case flagsDecoder flags of
         Ok f ->
             ( reduxToModel f, Cmd.none )
 
@@ -56,11 +58,12 @@ init flags =
                 ( fallBackModel, Cmd.none )
 
 
-flagsDecoder : Json.Decode.Decoder ReduxModel
+flagsDecoder : Json.Decode.Value -> Result String ReduxModel
 flagsDecoder =
-    Json.Decode.map2 ReduxModel
-        (field "value" Json.Decode.int)
-        (field "count" Json.Decode.int)
+    Json.Decode.decodeValue <|
+        Json.Decode.map2 ReduxModel
+            (field "value" Json.Decode.int)
+            (field "count" Json.Decode.int)
 
 
 reduxToModel : ReduxModel -> Model
