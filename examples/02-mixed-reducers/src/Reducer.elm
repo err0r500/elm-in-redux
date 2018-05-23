@@ -16,12 +16,6 @@ port increment : (Json.Encode.Value -> msg) -> Sub msg
 port decrement : (Json.Encode.Value -> msg) -> Sub msg
 
 
-type alias Model =
-    { modelValue : Int
-    , modelCount : Int
-    }
-
-
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
@@ -41,7 +35,7 @@ type Msg
 
 
 type alias Action =
-    { currentState : ReduxModel
+    { currentState : Model
     , actionType : String
     }
 
@@ -57,7 +51,7 @@ actionDecoder =
 -- MODEL
 
 
-type alias ReduxModel =
+type alias Model =
     { value : Int
     , count : Int
     }
@@ -65,40 +59,26 @@ type alias ReduxModel =
 
 fallBackModel : Model
 fallBackModel =
-    { modelCount = 1000, modelValue = 3 }
+    { count = 1000, value = 3 }
 
 
 
 -- ADAPTERS
 
 
-reduxDecoder : Json.Decode.Decoder ReduxModel
+reduxDecoder : Json.Decode.Decoder Model
 reduxDecoder =
     Json.Decode.map2
-        ReduxModel
+        Model
         (field "value" Json.Decode.int)
         (field "count" Json.Decode.int)
 
 
-reduxToModel : ReduxModel -> Model
-reduxToModel reduxModel =
-    { modelValue = reduxModel.value
-    , modelCount = reduxModel.count
-    }
-
-
-modelToRedux : Model -> ReduxModel
-modelToRedux model =
-    { value = model.modelValue
-    , count = model.modelCount
-    }
-
-
 modelToJSON : Model -> Json.Encode.Value
-modelToJSON { modelValue, modelCount } =
+modelToJSON { value, count } =
     object
-        [ ( "value", Json.Encode.int modelValue )
-        , ( "count", Json.Encode.int modelCount )
+        [ ( "value", Json.Encode.int value )
+        , ( "count", Json.Encode.int count )
         ]
 
 
@@ -114,15 +94,15 @@ update action model =
                 currState =
                     case Json.Decode.decodeValue actionDecoder actionBody of
                         Ok a ->
-                            reduxToModel a.currentState
+                            a.currentState
 
                         Err err ->
                             model
             in
-                ( { model | modelValue = currState.modelValue + currState.modelCount }, Cmd.none )
+                ( { model | value = currState.value + currState.count }, Cmd.none )
 
         Decrement ->
-            ( { model | modelValue = model.modelValue - model.modelCount }, Cmd.none )
+            ( { model | value = model.value - model.count }, Cmd.none )
 
         NoOp ->
             Debug.log ("Noop called")
@@ -133,7 +113,7 @@ init : Json.Decode.Value -> ( Model, Cmd Msg )
 init flags =
     case Json.Decode.decodeValue reduxDecoder flags of
         Ok f ->
-            ( reduxToModel f, Cmd.none )
+            ( f, Cmd.none )
 
         Err err ->
             Debug.log ("Error parsing flag, falling back to default value => " ++ toString flags ++ err)
@@ -143,6 +123,7 @@ init flags =
                 )
 
 
+main : Program Json.Decode.Value Model Msg
 main =
     Redux.programWithFlags
         { init = init

@@ -9,8 +9,8 @@ class ElmBridge {
     constructor(reducerName, elmModule, initialState) {
         this.init = initialState;
         this.worker = elmModule.worker(initialState);
-        this.prefix = uuid4();
 
+        this.prefix = `elm::${reducerName}`;
         this.reducerName = reducerName;
         this.reducer = this.getReducer(reducerName)
     }
@@ -76,10 +76,3 @@ const isElmAction = (action, prefix) => action.type === `${prefix}`;
 const elmInPortExists = (elmModule, portName) => elmModule.ports && elmModule.ports[portName];
 const elmOutPortReady = elmModule => elmModule && elmModule.ports && elmModule.ports[subscriptionPort];
 const actionTypeToElmPortName = actionType => camelCase(actionType); // elm doesn't like CAPITAL_CASE variables so convert it to camelCase
-
-const uuid4 = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-};
