@@ -1,9 +1,6 @@
 port module Reducer exposing (Model, Msg)
 
 import Redux
-import Task exposing (..)
-import Process
-import Time exposing (..)
 import Json.Encode exposing (..)
 import Json.Decode exposing (..)
 
@@ -29,8 +26,31 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ decrement <| always Decrement
-        , increment <| always Increment
+        , increment Increment
         ]
+
+
+
+-- ACTIONS
+
+
+type Msg
+    = NoOp
+    | Increment Json.Encode.Value
+    | Decrement
+
+
+type alias Action =
+    { currentState : ReduxModel
+    , actionType : String
+    }
+
+
+actionDecoder : Json.Decode.Decoder Action
+actionDecoder =
+    Json.Decode.map2 Action
+        (field "currState" reduxDecoder)
+        (field "type" Json.Decode.string)
 
 
 
@@ -43,24 +63,19 @@ type alias ReduxModel =
     }
 
 
+fallBackModel : Model
 fallBackModel =
     { modelCount = 1000, modelValue = 3 }
 
 
-init : Json.Decode.Value -> ( Model, Cmd Msg )
-init flags =
-    case Json.Decode.decodeValue flagsDecoder flags of
-        Ok f ->
-            ( reduxToModel f, Cmd.none )
 
-        Err err ->
-            Debug.log ("Error parsing flag, falling back to default value => " ++ toString flags ++ err)
-                ( fallBackModel, Cmd.none )
+-- ADAPTERS
 
 
-flagsDecoder : Json.Decode.Decoder ReduxModel
-flagsDecoder =
-    Json.Decode.map2 ReduxModel
+reduxDecoder : Json.Decode.Decoder ReduxModel
+reduxDecoder =
+    Json.Decode.map2
+        ReduxModel
         (field "value" Json.Decode.int)
         (field "count" Json.Decode.int)
 
@@ -72,23 +87,19 @@ reduxToModel reduxModel =
     }
 
 
-modelToRedux : Model -> Json.Encode.Value
-modelToRedux { modelValue, modelCount } =
+modelToRedux : Model -> ReduxModel
+modelToRedux model =
+    { value = model.modelValue
+    , count = model.modelCount
+    }
+
+
+modelToJSON : Model -> Json.Encode.Value
+modelToJSON { modelValue, modelCount } =
     object
         [ ( "value", Json.Encode.int modelValue )
         , ( "count", Json.Encode.int modelCount )
-        , ( "randomStuff", Json.Encode.int modelCount )
         ]
-
-
-
--- ACTIONS
-
-
-type Msg
-    = NoOp
-    | Increment
-    | Decrement
 
 
 
@@ -98,20 +109,44 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        Increment ->
-            ( { model | modelValue = model.modelValue + model.modelCount }, Cmd.none )
+        Increment actionBody ->
+            let
+                currState =
+                    case Json.Decode.decodeValue actionDecoder actionBody of
+                        Ok a ->
+                            reduxToModel a.currentState
+
+                        Err err ->
+                            model
+            in
+                ( { model | modelValue = currState.modelValue + currState.modelCount }, Cmd.none )
 
         Decrement ->
             ( { model | modelValue = model.modelValue - model.modelCount }, Cmd.none )
 
         NoOp ->
-            ( model, Cmd.none )
+            Debug.log ("Noop called")
+                ( model, Cmd.none )
+
+
+init : Json.Decode.Value -> ( Model, Cmd Msg )
+init flags =
+    case Json.Decode.decodeValue reduxDecoder flags of
+        Ok f ->
+            ( reduxToModel f, Cmd.none )
+
+        Err err ->
+            Debug.log ("Error parsing flag, falling back to default value => " ++ toString flags ++ err)
+                (update
+                    NoOp
+                    fallBackModel
+                )
 
 
 main =
     Redux.programWithFlags
         { init = init
         , update = update
-        , encode = modelToRedux
+        , encode = modelToJSON
         , subscriptions = subscriptions
         }

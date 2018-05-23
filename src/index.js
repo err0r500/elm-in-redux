@@ -3,13 +3,19 @@ import camelCase from 'camelcase'
 const subscriptionPort = 'elmOutPort';
 
 class ElmBridge {
-    constructor(elmModule, init) {
-        this.init = init;
-        this.worker = elmModule.worker(init);
+    // reducerName is the name you want to give to your reducer. It's also used to send it to elm
+    // elmModule is the elmModule that will handle your reducer
+    // initialState is the state you want your reducer to have before any action is received
+    constructor(reducerName, elmModule, initialState) {
+        this.init = initialState;
+        this.worker = elmModule.worker(initialState);
         this.prefix = uuid4();
+
+        this.reducerName = reducerName;
+        this.reducer = this.getReducer(reducerName)
     }
 
-    reducer = (state = this.init, action) => {
+    reducerFunc = (state = this.init, action) => {
         if (isElmAction(action, this.prefix)) {
             return Object.assign({}, state, action.payload)
         }
@@ -17,6 +23,7 @@ class ElmBridge {
         return state
     };
 
+    getReducer = () => ({[this.reducerName]: this.reducerFunc});
 
     middleware = store => next => action => {
         const elmPortName = actionTypeToElmPortName(action.type);
@@ -29,7 +36,12 @@ class ElmBridge {
 
         // send the complete action object and the current Store state
         if (elmInPortExists(this.worker, elmPortName)) {
-            this.worker.ports[elmPortName].send(Object.assign({currState: store.getState()}, action))
+            if (this.reducerName) {
+                this.worker.ports[elmPortName].send(Object.assign({}, {currState: store.getState()[this.reducerName]}, action))
+            } else {
+                this.worker.ports[elmPortName].send(Object.assign({}, action))
+
+            }
         }
         // send only action.payload
         if (action.payload !== undefined && elmInPortExists(this.worker, `${elmPortName}Payload`)) {
@@ -39,7 +51,7 @@ class ElmBridge {
         return next(action)
     };
 
-    // subscribes to elmOutPort and will send an action caught by reducer() above
+    // subscribes to elmOutPort and will send an action caught by reducerFunc() above
     subscribe = store => {
         if (elmOutPortReady(this.worker)) {
             this.worker.ports[subscriptionPort].subscribe(

@@ -33,7 +33,7 @@ suite =
                 in
                     Expect.all
                         [ \x -> Expect.true "value remains untouched" (updated.modelCount == orig.modelCount)
-                        , \x -> Expect.true "count remians untouched" (updated.modelValue == orig.modelValue)
+                        , \x -> Expect.true "count remains untouched" (updated.modelValue == orig.modelValue)
                         ]
                         (True)
         , fuzz2 Fuzz.int Fuzz.int "decrement" <|

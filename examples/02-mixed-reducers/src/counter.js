@@ -39,7 +39,10 @@ const mapStateToProps = ({elmReducer, otherElmReducer, reactReducer}) => {
 // handled by Reducer & OtherReducer
 const INCREMENT = 'INCREMENT';
 export const incrementAction = () => ({
-    type: INCREMENT
+    type: INCREMENT,
+    payload: {
+        salut: "sd;alfk",
+    }
 });
 
 // handled only by OtherReducer

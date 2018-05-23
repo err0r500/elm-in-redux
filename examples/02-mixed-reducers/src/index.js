@@ -13,20 +13,24 @@ import {basicCounterReducer, loggerMiddleware} from './others'
 
 
 const elmBridge1 = new ElmBridge(
+    "elmReducer",
     ElmModule.Reducer, // Reducer is the name of the elm module
-    {count: 1, value: 100}
+    {count: 10, value: 1}
 );
 
 const elmBridge2 = new ElmBridge(
+    "otherElmReducer",
     OtherElmModule.OtherReducer, // OtherReducer is the name of the elm module
     {count: 2, value: 10}
 );
 
-const reducer = combineReducers({
-    elmReducer: elmBridge1.reducer,
-    otherElmReducer: elmBridge2.reducer,
-    reactReducer: basicCounterReducer // a basic standard reducer, just for the example
-});
+const reducer = combineReducers(
+    Object.assign(
+        elmBridge1.reducer,
+        elmBridge2.reducer,
+        {reactReducer: basicCounterReducer}
+    )
+);
 
 const store = createStore(reducer, compose(
     applyMiddleware(

@@ -9,7 +9,7 @@ export function getEB(initial = {}) {
         )
     };
 
-    return new ElmBridge(module, initial);
+    return new ElmBridge("anything", module, initial);
 }
 
 test('should expose the API', () => {
@@ -25,7 +25,7 @@ describe('middleware action handling', () => {
     test('should dispatch any received action', () => {
         const sendToElm = jest.fn();
         const dontSendToElm = jest.fn();
-        const eB = new ElmBridge({
+        const eB = new ElmBridge("anyName", {
             worker: jest.fn().mockReturnValue({
                     ports: {
                         addTodo: {
@@ -39,7 +39,7 @@ describe('middleware action handling', () => {
             )
         }, {});
 
-        const store = configureStore([eB.middleware])({prop1: "hey"});
+        const store = configureStore([eB.middleware])({anyName: {prop1: "hey"}});
         const addTodo = () => ({type: 'ADD_TODO'});
 
         store.dispatch(addTodo());
@@ -54,7 +54,7 @@ describe('middleware action handling', () => {
         const sendToElm = jest.fn();
         const dontSendToElm = jest.fn();
 
-        const eB = new ElmBridge({
+        const eB = new ElmBridge("asd", {
             worker: jest.fn().mockReturnValue({
                     ports: {
                         addTodoPayload: {
@@ -68,7 +68,7 @@ describe('middleware action handling', () => {
             )
         }, {});
 
-        const store = configureStore([eB.middleware])({});
+        const store = configureStore([eB.middleware])({asd: {}});
         const addTodo = () => ({
             type: 'ADD_TODO',
             payload: 'hey'
@@ -89,7 +89,7 @@ describe('middleware action handling', () => {
     test('action with type TO_ELM_PORT will not be sent, the port is reserved to outcoming messages', () => {
         const sendToElm = jest.fn();
 
-        const eB = new ElmBridge({
+        const eB = new ElmBridge("asd", {
             worker: jest.fn().mockReturnValue({
                     ports: {
                         elmOutPort: {

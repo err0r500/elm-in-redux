@@ -9,7 +9,7 @@ export function getEB(initial = {}) {
         )
     };
 
-    return new ElmBridge(module, initial);
+    return new ElmBridge("asd", module, initial);
 }
 
 
@@ -17,7 +17,7 @@ describe('subscribe', () => {
     test('the subscribe method of elmOutPort takes a func and applies it an [2] that will be transformed to an object', () => {
         const sendToElm = jest.fn();
 
-        const eB = new ElmBridge({
+        const eB = new ElmBridge("anything", {
             worker: jest.fn().mockReturnValue({
                     ports: {
                         elmOutPort: {
@@ -39,7 +39,7 @@ describe('subscribe', () => {
     })
 
     test('should dispatch the action and middleware should update reducer accordingly', () => {
-        const eB = new ElmBridge({
+        const eB = new ElmBridge("anything", {
             worker: jest.fn().mockReturnValue({
                     ports: {
                         elmOutPort: {
@@ -57,6 +57,6 @@ describe('subscribe', () => {
 
         expect(store.getActions()).toEqual([{type: eB.prefix, payload: {prop1: 'hey'}}]);
 
-        expect(eB.reducer(store.getState(), store.getActions()[0])).toEqual({prop1: 'hey'});
+        expect(eB.reducerFunc(store.getState(), store.getActions()[0])).toEqual({prop1: 'hey'});
     })
 });
