@@ -43,7 +43,7 @@ type alias Action =
 actionDecoder : Json.Decode.Decoder Action
 actionDecoder =
     Json.Decode.map2 Action
-        (field "currState" reduxDecoder)
+        (field "currState" reduxToModel)
         (field "type" Json.Decode.string)
 
 
@@ -66,16 +66,16 @@ fallBackModel =
 -- ADAPTERS
 
 
-reduxDecoder : Json.Decode.Decoder Model
-reduxDecoder =
+reduxToModel : Json.Decode.Decoder Model
+reduxToModel =
     Json.Decode.map2
         Model
         (field "value" Json.Decode.int)
         (field "count" Json.Decode.int)
 
 
-modelToJSON : Model -> Json.Encode.Value
-modelToJSON { value, count } =
+modelToRedux : Model -> Json.Encode.Value
+modelToRedux { value, count } =
     object
         [ ( "value", Json.Encode.int value )
         , ( "count", Json.Encode.int count )
@@ -87,14 +87,14 @@ modelToJSON { value, count } =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update action model =
-    case action of
+update msg model =
+    case msg of
         Increment actionBody ->
             let
                 currState =
                     case Json.Decode.decodeValue actionDecoder actionBody of
-                        Ok a ->
-                            a.currentState
+                        Ok action ->
+                            action.currentState
 
                         Err err ->
                             model
@@ -105,22 +105,18 @@ update action model =
             ( { model | value = model.value - model.count }, Cmd.none )
 
         NoOp ->
-            Debug.log ("Noop called")
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
 
 init : Json.Decode.Value -> ( Model, Cmd Msg )
 init flags =
-    case Json.Decode.decodeValue reduxDecoder flags of
-        Ok f ->
-            ( f, Cmd.none )
+    case Json.Decode.decodeValue reduxToModel flags of
+        Ok model ->
+            ( model, Cmd.none )
 
         Err err ->
             Debug.log ("Error parsing flag, falling back to default value => " ++ toString flags ++ err)
-                (update
-                    NoOp
-                    fallBackModel
-                )
+                ( fallBackModel, Cmd.none )
 
 
 main : Program Json.Decode.Value Model Msg
@@ -128,6 +124,6 @@ main =
     Redux.programWithFlags
         { init = init
         , update = update
-        , encode = modelToJSON
+        , encode = modelToRedux
         , subscriptions = subscriptions
         }

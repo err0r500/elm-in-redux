@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import {Provider} from 'react-redux'
-import {createStore, applyMiddleware, combineReducers, compose} from 'redux'
+import {createStore, applyMiddleware, combineReducers} from 'redux'
 import {default as Counter, reducerInitialState} from './counter'
 
 import ElmBridge from 'elm-in-redux'
@@ -9,13 +9,12 @@ import ElmBridge from 'elm-in-redux'
 import ElmModule from './MyReducer'
 
 const elmBridge = new ElmBridge(
+    "elmReducer",
     ElmModule.MyReducer, // MyReducer is the name of the elm module
     reducerInitialState // set the initial state in redux & elm module
 );
 
-const reducer = combineReducers({
-    elmReducer: elmBridge.reducer,
-});
+const reducer = combineReducers(elmBridge.reducer);
 
 const store = createStore(reducer,
     applyMiddleware(
